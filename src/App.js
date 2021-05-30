@@ -67,9 +67,9 @@ function App() {
           })
 
           const hitObjectJsonString = JSON.stringify(out.HitObjects)
-          const songMd5Hash = md5(hitObjectJsonString)
+          const audioMD5Hash = md5(hitObjectJsonString)
 
-          out.SongMD5Hash = songMd5Hash
+          out.AudioMD5Hash = audioMD5Hash
 
           setConversion(JSON.stringify(out, null, 2))
         }}>CONVERT</Button>
