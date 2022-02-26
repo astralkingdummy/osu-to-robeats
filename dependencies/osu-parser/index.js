@@ -139,8 +139,7 @@ function beatmapParser() {
 
     var hitObject = {
       startTime:  parseInt(members[2]),
-      endTime: parseInt(members[5]),
-      newCombo:   ((objectType & 4) === 4),
+      newCombo:   ((objectType & 4) == 4),
       soundTypes: [],
       position: [
         parseInt(members[0]),
@@ -166,12 +165,18 @@ function beatmapParser() {
      * 2: slider
      * 8: spinner
      */
-    if (hitObject.endTime === 0) {
+    if ((objectType & 1) == 1) {
       // Circle
       beatmap.nbCircles++;
       hitObject.objectName = 'circle';
       hitObject.additions  = parseAdditions(members[5]);
-    } else {
+    } else if ((objectType & 8) == 8) {
+      // Spinner
+      beatmap.nbSpinners++;
+      hitObject.objectName = 'spinner';
+      hitObject.endTime    = parseInt(members[5]);
+      hitObject.additions  = parseAdditions(members[6]);
+    } else if ((objectType & 2) == 2) {
       // Slider
       beatmap.nbSliders++;
       hitObject.objectName  = 'slider';
@@ -192,11 +197,12 @@ function beatmapParser() {
         var pxPerBeat      = beatmap.SliderMultiplier * 100 * timing.velocity;
         var beatsNumber    = (hitObject.pixelLength * hitObject.repeatCount) / pxPerBeat;
         hitObject.duration = Math.ceil(beatsNumber * timing.beatLength);
+        hitObject.endTime  = hitObject.startTime + hitObject.duration;
       }
       /**
        * Parse slider points
        */
-      var points = (members[5] || '').split('|');
+      var points = (members[5] || '').split('|');
       if (points.length) {
         hitObject.curveType = curveTypes[points[0]] || 'unknown';
 
@@ -247,6 +253,9 @@ function beatmapParser() {
         // If endPosition could not be calculated, approximate it by setting it to the last point
         hitObject.endPosition = hitObject.points[hitObject.points.length - 1];
       }
+    } else {
+      // Unknown
+      hitObject.objectName = 'unknown';
     }
 
     beatmap.hitObjects.push(hitObject);
@@ -403,7 +412,6 @@ function beatmapParser() {
 
     for (var i = 1, l = timingPoints.length; i < l; i++) {
       if (!timingPoints[i].hasOwnProperty('bpm')) {
-        timingPoints[i].offset = timingPoints[i - 1].offset;
         timingPoints[i].beatLength = timingPoints[i - 1].beatLength;
         timingPoints[i].bpm        = timingPoints[i - 1].bpm;
       }
