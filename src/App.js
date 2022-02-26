@@ -11,12 +11,6 @@ const xToTrackMap = {
   448: 4
 }
 
-function getManiaKeys(osuText) {
-  const csIdx = osuText.substring(osuText.indexOf("CircleSize:"), osuText.indexOf("CircleSize:") + "CircleSize:".length + 1);
-  const keys = csIdx.substring(csIdx.length - 1, csIdx.length)
-  return keys
-}
-
 function App() {
   const [ osuText, setOsuText ] = useState("")
   const [ conversion, setConversion ] = useState("")
@@ -32,6 +26,7 @@ function App() {
         <Button color="primary" onClick={() => {
           let finalStrOut = ""
           const data = parseContent(osuText)
+          console.log(data.CircleSize)
           let out = {
             "AudioArtist": data.Artist,
             "AudioFilename": data.Title,
@@ -50,9 +45,12 @@ function App() {
           }
 
           let out_2 = {
-            "KeyMode": getManiaKeys(data),
-            
+            "KeyMode": data.CircleSize,
+            "TimingPoints": [],
+            "HitObjects": []
           }
+
+
 
           // data.hitObjects.forEach(hitObject => {
           //   switch (hitObject.objectName) {
@@ -90,6 +88,7 @@ function App() {
             })
           }) 
 
+          setConversion(JSON.stringify(out_2, null, 2))
           // setConversion(JSON.stringify(out, null, 2))
         }}>COMPRESS</Button>
       </div>
