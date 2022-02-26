@@ -11,6 +11,14 @@ const xToTrackMap = {
   448: 4
 }
 
+function getManiaKeys(osuText) {
+  let stringOut = ""
+  let cs = "CircleSize:";
+  const csIdx = osuText.substring(osuText.indexOf("CircleSize:"), osuText.indexOf("CircleSize:") + "CircleSize:".length + 1);
+  const keys = csIdx.substring(csIdx.length - 1, csIdx.length)
+  return keys
+}
+
 function App() {
   const [ osuText, setOsuText ] = useState("")
   const [ conversion, setConversion ] = useState("")
@@ -44,8 +52,8 @@ function App() {
           }
 
           let out_2 = {
-            "KeyMode": "4",
-
+            "KeyMode": getManiaKeys(data),
+            
           }
 
           // data.hitObjects.forEach(hitObject => {
