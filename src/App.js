@@ -11,6 +11,21 @@ const xToTrackMap = {
   448: 4
 }
 
+function isInherited(timingPoint) {
+  if (timingPoint.timingChange === true)
+    return 1
+  else
+    return 0
+}
+
+function getHeritageValue(isInherited, tp) {
+  if (isInherited === true) {
+    return tp.velocity
+  } else {
+    return tp.beatLength
+  }
+}
+
 function App() {
   const [ osuText, setOsuText ] = useState("")
   const [ conversion, setConversion ] = useState("")
@@ -20,7 +35,7 @@ function App() {
     <div className="App">
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       <div>
-  		  <TextField helperText={".osu file input"} style = {{width: "40%"}} multiline value={osuText} rows={20} onChange={(event) => setOsuText(event.target.value)}/>
+          <TextField helperText={".osu file input"} style = {{width: "40%"}} multiline value={osuText} rows={20} onChange={(event) => setOsuText(event.target.value)}/>
       </div>
       <div>
         <Button color="primary" onClick={() => {
@@ -44,11 +59,16 @@ function App() {
             "TimingPoints" : []
           }
 
-          let out_2 = {
+          let out_2 = { 
             "KeyMode": data.CircleSize,
             "TimingPoints": [],
             "HitObjects": []
           }
+
+          let str_final = out_2.KeyMode + "\nT\n"
+
+          const tpoints = data.timingPoints;
+          console.log(JSON.stringify(tpoints, null, 2))
 
 
 
@@ -74,26 +94,42 @@ function App() {
           //   }
           // })
 
+          tpoints.forEach(tp => {
+            const inherited = isInherited(tp)
+            const heritageVal = getHeritageValue(inherited, tp)
+
+            str_final += tp.offset + "," + inherited + "," + heritageVal + "\n"
+          })
+          
+          str_final += "H\n"
+
+          data.hitObjects.forEach(hitObject => {
+            console.log(hitObject.objectName)
+            switch (hitObject.objectName) {
+              case "circle":
+                str_final += hitObject.startTime + "," + xToTrackMap[hitObject.position[0]] + "," + "0," + "0" +"\n"
+                break
+              case "slider":
+                let duration = hitObject.endTime - hitObject.startTime
+                str_final += hitObject.startTime + "," + xToTrackMap[hitObject.position[0]] + "," + "1," + duration +"\n"
+                break
+              default:
+                break
+            }
+          })
+
           const hitObjectJsonString = JSON.stringify(out.HitObjects)
           const audioMD5Hash = md5(hitObjectJsonString)
 
           out.AudioMD5Hash = audioMD5Hash
 
-          //This for loop doesn't parse the data properly which is annoying
-          data.timingPoints.forEach(tp => {
-            out.TimingPoints.push({
-              "Time": tp.offset,
-              "BeatLength": tp.beatLength,
-              "BPM": tp.bpm
-            })
-          }) 
-
-          setConversion(JSON.stringify(out_2, null, 2))
+          setConversion(str_final)
+          //setConversion(JSON.stringify(out_2, null, 2))
           // setConversion(JSON.stringify(out, null, 2))
         }}>COMPRESS</Button>
       </div>
       <div>
-		    <TextField helperText={"txt output"} style = {{width: "40%"}} multiline rows={20} value={conversion}></TextField>
+            <TextField helperText={"txt output"} style = {{width: "40%"}} multiline rows={20} value={conversion}></TextField>
       </div>
     </div>
   );
