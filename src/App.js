@@ -12,8 +12,6 @@ const xToTrackMap = {
 }
 
 function getManiaKeys(osuText) {
-  let stringOut = ""
-  let cs = "CircleSize:";
   const csIdx = osuText.substring(osuText.indexOf("CircleSize:"), osuText.indexOf("CircleSize:") + "CircleSize:".length + 1);
   const keys = csIdx.substring(csIdx.length - 1, csIdx.length)
   return keys
