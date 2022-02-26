@@ -1,6 +1,7 @@
 import './App.css';
 import { useEffect, useState } from "react"
-import { Button, TextField } from '@material-ui/core';
+import { CopyToClipboard } from 'react-copy-to-clipboard/lib/Component';
+import { Button, TextField, ToolTip } from '@material-ui/core';
 import * as md5 from "md5"
 import { parseContent } from "osu-parser"
 
@@ -30,6 +31,7 @@ function App() {
   const [ osuText, setOsuText ] = useState("")
   const [ conversion, setConversion ] = useState("")
   const [ assetId, setAssetId ] = useState(0)
+  const [ copiedText, setCopiedText ] = useState()
   
   return (
     <div className="App">
@@ -39,60 +41,9 @@ function App() {
       </div>
       <div>
         <Button color="primary" onClick={() => {
-          let finalStrOut = ""
           const data = parseContent(osuText)
-          console.log(data.CircleSize)
-          let out = {
-            "AudioArtist": data.Artist,
-            "AudioFilename": data.Title,
-            "AudioDifficulty": 1,
-            "AudioMapper": data.Creator,
-            "AudioVolume": 0.5,
-            "AudioTimeOffset": -75,
-            "AudioAssetId": `rbxassetid://${assetId}`,
-            "AudioCoverImageAssetId": "",
-            "AudioDescription": "",
-            "AudioHitSFXGroup": 0,
-            "AudioMod": 0,
-            "AudioNotePrebufferTime": 1000,
-            "HitObjects": [],
-            "TimingPoints" : []
-          }
-
-          let out_2 = { 
-            "KeyMode": data.CircleSize,
-            "TimingPoints": [],
-            "HitObjects": []
-          }
-
-          let str_final = out_2.KeyMode + "\nT\n"
-
           const tpoints = data.timingPoints;
-          console.log(JSON.stringify(tpoints, null, 2))
-
-
-
-          // data.hitObjects.forEach(hitObject => {
-          //   switch (hitObject.objectName) {
-          //     case "circle":
-          //       out.HitObjects.push({
-          //         "Type": 1,
-          //         "Time": hitObject.startTime,
-          //         "Track": xToTrackMap[hitObject.position[0]]
-          //       })
-          //       break
-          //     case "slider":
-          //       out.HitObjects.push({
-          //         "Type": 2,
-          //         "Time": hitObject.startTime,
-          //         "Track": xToTrackMap[hitObject.position[0]],
-          //         "Duration": hitObject.endTime - hitObject.startTime
-          //       })
-          //       break
-          //     default:
-          //       break
-          //   }
-          // })
+          let str_final = data.CircleSize + "\nT\n"
 
           tpoints.forEach(tp => {
             const inherited = isInherited(tp)
@@ -100,7 +51,7 @@ function App() {
 
             str_final += tp.offset + "," + inherited + "," + heritageVal + "\n"
           })
-          
+
           str_final += "H\n"
 
           data.hitObjects.forEach(hitObject => {
@@ -118,18 +69,11 @@ function App() {
             }
           })
 
-          const hitObjectJsonString = JSON.stringify(out.HitObjects)
-          const audioMD5Hash = md5(hitObjectJsonString)
-
-          out.AudioMD5Hash = audioMD5Hash
-
           setConversion(str_final)
-          //setConversion(JSON.stringify(out_2, null, 2))
-          // setConversion(JSON.stringify(out, null, 2))
         }}>COMPRESS</Button>
       </div>
       <div>
-            <TextField helperText={"txt output"} style = {{width: "40%"}} multiline rows={20} value={conversion}></TextField>
+            <TextField helperText={"compressed output"} style = {{width: "50%"}} multiline rows={20} value={conversion}></TextField>
       </div>
     </div>
   );
