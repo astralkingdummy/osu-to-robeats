@@ -21,12 +21,10 @@ function App() {
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       <div>
   		  <TextField helperText={".osu file input"} style = {{width: "40%"}} multiline value={osuText} rows={20} onChange={(event) => setOsuText(event.target.value)}/>
-        <div>
-          <TextField helperText={"Asset Id"} style = {{width: "20%"}} value={assetId} rows={20} onChange={(event) => setAssetId(event.target.value)}/>
-        </div>
       </div>
       <div>
         <Button color="primary" onClick={() => {
+          let finalStrOut = ""
           const data = parseContent(osuText)
           let out = {
             "AudioArtist": data.Artist,
@@ -41,41 +39,56 @@ function App() {
             "AudioHitSFXGroup": 0,
             "AudioMod": 0,
             "AudioNotePrebufferTime": 1000,
-            "HitObjects": []
+            "HitObjects": [],
+            "TimingPoints" : []
           }
 
-          data.hitObjects.forEach(hitObject => {
-            switch (hitObject.objectName) {
-              case "circle":
-                out.HitObjects.push({
-                  "Type": 1,
-                  "Time": hitObject.startTime,
-                  "Track": xToTrackMap[hitObject.position[0]]
-                })
-                break
-              case "slider":
-                out.HitObjects.push({
-                  "Type": 2,
-                  "Time": hitObject.startTime,
-                  "Track": xToTrackMap[hitObject.position[0]],
-                  "Duration": hitObject.endTime - hitObject.startTime
-                })
-                break
-              default:
-                break
-            }
-          })
+          let out_2 = {
+            "KeyMode": "4",
+
+          }
+
+          // data.hitObjects.forEach(hitObject => {
+          //   switch (hitObject.objectName) {
+          //     case "circle":
+          //       out.HitObjects.push({
+          //         "Type": 1,
+          //         "Time": hitObject.startTime,
+          //         "Track": xToTrackMap[hitObject.position[0]]
+          //       })
+          //       break
+          //     case "slider":
+          //       out.HitObjects.push({
+          //         "Type": 2,
+          //         "Time": hitObject.startTime,
+          //         "Track": xToTrackMap[hitObject.position[0]],
+          //         "Duration": hitObject.endTime - hitObject.startTime
+          //       })
+          //       break
+          //     default:
+          //       break
+          //   }
+          // })
 
           const hitObjectJsonString = JSON.stringify(out.HitObjects)
           const audioMD5Hash = md5(hitObjectJsonString)
 
           out.AudioMD5Hash = audioMD5Hash
 
-          setConversion(JSON.stringify(out, null, 2))
-        }}>CONVERT</Button>
+          //This for loop doesn't parse the data properly which is annoying
+          data.timingPoints.forEach(tp => {
+            out.TimingPoints.push({
+              "Time": tp.offset,
+              "BeatLength": tp.beatLength,
+              "BPM": tp.bpm
+            })
+          }) 
+
+          // setConversion(JSON.stringify(out, null, 2))
+        }}>COMPRESS</Button>
       </div>
       <div>
-		    <TextField helperText={"JSON output"} style = {{width: "40%"}} multiline rows={20} value={conversion}></TextField>
+		    <TextField helperText={"txt output"} style = {{width: "40%"}} multiline rows={20} value={conversion}></TextField>
       </div>
     </div>
   );

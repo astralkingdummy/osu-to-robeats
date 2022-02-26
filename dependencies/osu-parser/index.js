@@ -403,6 +403,7 @@ function beatmapParser() {
 
     for (var i = 1, l = timingPoints.length; i < l; i++) {
       if (!timingPoints[i].hasOwnProperty('bpm')) {
+        timingPoints[i].offset = timingPoints[i - 1].offset;
         timingPoints[i].beatLength = timingPoints[i - 1].beatLength;
         timingPoints[i].bpm        = timingPoints[i - 1].bpm;
       }
